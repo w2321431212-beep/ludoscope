@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 490" preserveAspectRatio="xMidYMid slice">
+<defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#251242"/><stop offset="1" stop-color="#543573"/></linearGradient><linearGradient id="orb" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#a4ff9b" stop-opacity=".95"/><stop offset="1" stop-color="#a4ff9b" stop-opacity=".05"/></linearGradient><radialGradient id="light"><stop stop-color="#a4ff9b" stop-opacity=".43"/><stop offset="1" stop-color="#a4ff9b" stop-opacity="0"/></radialGradient><pattern id="grain" width="30" height="30" patternUnits="userSpaceOnUse"><circle cx="4" cy="12" r=".8" fill="#fff" opacity=".25"/><circle cx="21" cy="23" r="1" fill="#fff" opacity=".14"/></pattern></defs>
+<rect width="920" height="490" fill="url(#bg)"/>
+<circle cx="600" cy="200" r="270" fill="url(#light)"/>
+<rect width="920" height="490" fill="url(#grain)"/>
+<circle cx="680" cy="115" r="132" fill="url(#orb)"/><g fill="#241437" opacity=".8"><rect x="140" y="150" width="85" height="330"/><rect x="240" y="110" width="120" height="375"/><rect x="382" y="190" width="65" height="290"/><rect x="460" y="65" width="130" height="420"/><rect x="608" y="140" width="115" height="340"/><rect x="737" y="205" width="112" height="290"/></g>
+<path d="M120 180h600M240 140h120m100-45h130" stroke="#b6ff94" stroke-width="3" opacity=".44"/>
+<g fill="#91efb1" opacity=".75"><rect x="166" y="213" width="15" height="30"/><rect x="268" y="151" width="15" height="30"/><rect x="300" y="151" width="15" height="30"/><rect x="492" y="115" width="15" height="30"/><rect x="523" y="115" width="15" height="30"/><rect x="649" y="198" width="15" height="30"/></g>
+<path d="M0 375Q350 320 920 365L920 490H0Z" fill="#12142b" opacity=".83"/>
+<g opacity=".8" font-family="Arial,Helvetica,sans-serif"><text x="42" y="52" font-size="17" letter-spacing="5" font-weight="800" fill="#fff">LUDOSCOPE / MARKET SPOTLIGHT</text></g>
+<g opacity=".65" font-family="Arial,Helvetica,sans-serif"><text x="870" y="456" text-anchor="end" font-size="13" letter-spacing="3" fill="#fff">OFFLINE PREVIEW · NOT OFFICIAL ART</text></g>
+</svg>

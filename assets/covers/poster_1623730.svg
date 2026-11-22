@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 490" preserveAspectRatio="xMidYMid slice">
+<defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#153b6a"/><stop offset="1" stop-color="#238f86"/></linearGradient><linearGradient id="orb" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#e7ffe1" stop-opacity=".95"/><stop offset="1" stop-color="#e7ffe1" stop-opacity=".05"/></linearGradient><radialGradient id="light"><stop stop-color="#e7ffe1" stop-opacity=".43"/><stop offset="1" stop-color="#e7ffe1" stop-opacity="0"/></radialGradient><pattern id="grain" width="30" height="30" patternUnits="userSpaceOnUse"><circle cx="4" cy="12" r=".8" fill="#fff" opacity=".25"/><circle cx="21" cy="23" r="1" fill="#fff" opacity=".14"/></pattern></defs>
+<rect width="920" height="490" fill="url(#bg)"/>
+<circle cx="600" cy="200" r="270" fill="url(#light)"/>
+<rect width="920" height="490" fill="url(#grain)"/>
+<circle cx="570" cy="190" r="132" fill="url(#orb)"/><circle cx="570" cy="190" r="91" fill="none" stroke="#e4ffe6" stroke-width="2" opacity=".48"/>
+<path d="M0 385 Q140 245 280 352 Q340 175 455 311 Q570 182 700 337 Q815 230 920 365 L920 490 L0 490Z" fill="#8fd8a4" opacity=".85"/>
+<path d="M0 427 Q195 355 350 408 Q575 300 920 397 L920 490 L0 490Z" fill="#205f65"/>
+<path d="M90 365q35-90 73 0m22 0q40-100 80 0m330-25q25-80 55 0" stroke="#dbffe3" stroke-width="8" fill="none" opacity=".7"/>
+<g fill="#f8ffe8"><path d="m262 125 9 21 22 4-17 13 6 22-20-11-21 11 4-22-17-13 23-4z"/><circle cx="744" cy="110" r="7"/><circle cx="801" cy="175" r="5"/></g>
+<g opacity=".8" font-family="Arial,Helvetica,sans-serif"><text x="42" y="52" font-size="17" letter-spacing="5" font-weight="800" fill="#fff">LUDOSCOPE / MARKET SPOTLIGHT</text></g>
+<g opacity=".65" font-family="Arial,Helvetica,sans-serif"><text x="870" y="456" text-anchor="end" font-size="13" letter-spacing="3" fill="#fff">OFFLINE PREVIEW · NOT OFFICIAL ART</text></g>
+</svg>

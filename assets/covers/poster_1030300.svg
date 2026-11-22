@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 490" preserveAspectRatio="xMidYMid slice">
+<defs><linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#33142e"/><stop offset="1" stop-color="#cd423e"/></linearGradient><linearGradient id="orb" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#f8ccae" stop-opacity=".95"/><stop offset="1" stop-color="#f8ccae" stop-opacity=".05"/></linearGradient><radialGradient id="light"><stop stop-color="#f8ccae" stop-opacity=".43"/><stop offset="1" stop-color="#f8ccae" stop-opacity="0"/></radialGradient><pattern id="grain" width="30" height="30" patternUnits="userSpaceOnUse"><circle cx="4" cy="12" r=".8" fill="#fff" opacity=".25"/><circle cx="21" cy="23" r="1" fill="#fff" opacity=".14"/></pattern></defs>
+<rect width="920" height="490" fill="url(#bg)"/>
+<circle cx="600" cy="200" r="270" fill="url(#light)"/>
+<rect width="920" height="490" fill="url(#grain)"/>
+<circle cx="650" cy="160" r="140" fill="#f7b57a" opacity=".6"/><circle cx="650" cy="160" r="112" fill="none" stroke="#ffe7cb" stroke-width="4" opacity=".8"/>
+<path d="M0 370 Q210 265 365 351 Q570 245 920 375 L920 490 L0 490Z" fill="#5b2445"/><path d="M0 430 Q250 355 450 410 Q650 300 920 410 L920 490 L0 490Z" fill="#23112b"/>
+<path d="M534 70 C516 196 548 284 476 411" fill="none" stroke="#ffdae0" stroke-width="9" opacity=".8"/>
+<path d="M570 42 C564 187 605 282 565 414" fill="none" stroke="#ed8692" stroke-width="5" opacity=".95"/>
+<path d="M465 220 L660 180 L565 275 Z" fill="#ffe6db" opacity=".65"/><g fill="#f6c6aa"><circle cx="335" cy="105" r="6"/><circle cx="390" cy="154" r="4"/><circle cx="785" cy="230" r="7"/></g>
+<g opacity=".8" font-family="Arial,Helvetica,sans-serif"><text x="42" y="52" font-size="17" letter-spacing="5" font-weight="800" fill="#fff">LUDOSCOPE / MARKET SPOTLIGHT</text></g>
+<g opacity=".65" font-family="Arial,Helvetica,sans-serif"><text x="870" y="456" text-anchor="end" font-size="13" letter-spacing="3" fill="#fff">OFFLINE PREVIEW · NOT OFFICIAL ART</text></g>
+</svg>

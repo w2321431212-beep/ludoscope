@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta name="theme-color" content="#120f1f" />
+  <meta name="description" content="LudoScope · 基于31,953款Steam独立游戏与108万条用户评论的游戏市场情报与AI研究原型。" />
+  <title>LudoScope NOVA — 游戏制作与市场情报</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="assessment.css" />
+  <link rel="stylesheet" href="nova.css" />
+</head>
+<body>
+  <div class="app-shell" id="appShell">
+    <aside class="sidebar" id="sidebar">
+      <div class="brand" role="banner">
+        <span class="brand-mark" aria-hidden="true"><span></span><span></span><span></span></span>
+        <div><div class="brand-name">LUDOSCOPE<span class="brand-dot">.</span></div><div class="brand-subtitle">DATA MEETS PLAY</div></div>
+      </div>
+      <div class="workspace-pill"><span class="workspace-avatar">L</span><div><strong>LudoScope Playground</strong><small>DATA • DESIGN • DISCOVER</small></div><span class="workspace-chevron">⌄</span></div>
+      <div class="sidebar-section-label">工作台 / WORKSPACE</div>
+      <nav class="sidebar-nav" aria-label="主导航">
+        <button class="nav-item active" data-nav="overview"><span class="nav-icon" data-ico="layout-dashboard"></span><span>探索首页</span></button>
+        <button class="nav-item" data-nav="radar"><span class="nav-icon" data-ico="activity"></span><span>游戏机会雷达</span></button>
+        <button class="nav-item feature-nav" data-nav="assessment"><span class="nav-icon" data-ico="sparkles"></span><span>项目鉴定工作台</span></button>
+        <button class="nav-item" data-nav="reports"><span class="nav-icon" data-ico="clipboard-list"></span><span>我的评估报告</span></button>
+        <button class="nav-item" data-nav="explorer"><span class="nav-icon" data-ico="search"></span><span>游戏数据库</span></button>
+        <button class="nav-item" data-nav="segments"><span class="nav-icon" data-ico="bar-chart-3"></span><span>细分市场</span></button>
+        <button class="nav-item" data-nav="watchlist"><span class="nav-icon" data-ico="bookmark"></span><span>我的观察列表</span><span class="nav-count" id="watchCount">0</span></button>
+      </nav>
+      <div class="sidebar-section-label sidebar-label-second">数据生态 / DATA ECOSYSTEM</div>
+      <nav class="sidebar-nav" aria-label="研究数据">
+        <button class="nav-item" data-nav="research"><span class="nav-icon" data-ico="brain-circuit"></span><span>研究证据实验室</span></button>
+      </nav>
+      <div class="sidebar-bottom">
+        <div class="sidebar-status"><span class="status-pulse"></span><div><strong>研究数据已载入</strong><small>分析更新 · 2026.11.19</small></div></div>
+        <div class="sidebar-foot">Built with real Steam data<br/>NOVA PROTOTYPE · v0.3</div>
+      </div>
+    </aside>
+    <div class="main-area">
+      <header class="topbar">
+        <div class="topbar-left"><button class="mobile-menu" id="menuButton" aria-label="展开菜单"><span data-ico="menu"></span></button><span class="breadcrumbs">LUDOSCOPE NOVA</span><span class="breadcrumb-slash">/</span><strong id="currentSection">市场总览</strong></div>
+        <div class="topbar-right">
+          <button class="global-search-button" id="globalSearch" title="检索游戏"><span data-ico="search"></span><span>搜索 31,953 款游戏...</span><kbd>/</kbd></button>
+          <div class="lang-switch-wrap"><span data-ico="globe"></span><select id="langSwitch" class="lang-switch" aria-label="语言切换"><option value="zh-CN">简体中文</option><option value="zh-TW">繁體中文</option><option value="en">English</option></select></div>
+          <span class="topbar-snapshot"><span class="status-pulse"></span>DATA SNAPSHOT</span>
+          <button class="topbar-avatar" id="aboutButton" title="关于本项目">LS</button>
+        </div>
+      </header>
+      <main class="content" id="page" tabindex="-1" aria-live="polite"><div class="loading"><div class="loading-spinner"></div>正在加载真实 Steam 数据...</div></main>
+    </div>
+  </div>
+  <div id="overlayRoot"></div>
+  <div id="toastRoot" aria-live="polite"></div>
+  <script src="data/catalog.js"></script>
+  <script src="i18n.js"></script>
+  <script src="assessment.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
