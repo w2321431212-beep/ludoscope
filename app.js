@@ -152,6 +152,60 @@ const storageGet=()=>{try{return JSON.parse(localStorage.getItem('ludoscope_watc
 const state={route:'overview',lang:localStorage.getItem(LANG_KEY)||'zh-CN',query:'',ai:'all',genre:'all',year:'all',minReviews:'0',sort:'reviews',radarGenre:'all',radarAI:'all',radarPrice:'all',radarRank:'reviews',page:1,watchlist:storageGet(),selected:[],segment:'Action',segmentSort:'aiShare',detail:null};
 const byId=new Map(G.map(g=>[get(g,'appid'),g]));
 const topsByCurrent=[...G].sort((a,b)=>(get(b,'current')||0)-(get(a,'current')||0)).slice(0,12);
+// Near-live data from Steam's public player-count endpoint, fetched by a scheduled
+// GitHub Actions workflow. Missing/stale files explicitly fall back to old snapshots.
+let livePlayerPayload=null;
+const LIVE_FRESH_MS=2*60*60*1000;
+function usableLivePlayers(){
+  if(!livePlayerPayload||livePlayerPayload.source!=='Steam Web API')return false;
+  const t=Date.parse(livePlayerPayload.updated_at||'');
+  return Number.isFinite(t)&&t<=Date.now()+5*60*1000&&Date.now()-t<=LIVE_FRESH_MS
+    &&livePlayerPayload.players&&Object.keys(livePlayerPayload.players).length>=3;
+}
+function liveRankedGames(){
+  if(!usableLivePlayers())return null;
+  const games=Object.entries(livePlayerPayload.players).map(([id,count])=>({
+    game:byId.get(Number(id)), count:Number(count)
+  })).filter(x=>x.game&&Number.isFinite(x.count)&&x.count>=0)
+    .sort((a,b)=>b.count-a.count).slice(0,5);
+  return games.length>=3?games:null;
+}
+function playerHeatSubtitle(){
+  if(!liveRankedGames())return txt('2026-11-03 历史快照 · 实时数据尚未取得','2026-11-03 歷史快照 · 尚未取得即時資料','Historical snapshot · live update unavailable');
+  const t=new Date(livePlayerPayload.updated_at);
+  const loc=state.lang==='en'?'en-US':(state.lang==='zh-TW'?'zh-TW':'zh-CN');
+  const at=t.toLocaleString(loc,{month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'});
+  const n=livePlayerPayload.candidate_count||Object.keys(livePlayerPayload.players).length;
+  return txt(`Steam 官方数据 · ${n} 款候选游戏 · 更新于 ${at} · 非全站排名`,
+    `Steam 官方資料 · ${n} 款候選遊戲 · 更新於 ${at} · 非全站排名`,
+    `Steam API · ${n} tracked games · updated ${at} · not an all-Steam ranking`);
+}
+function refreshLiveHeat(){
+  if(state.route!=='overview')return;
+  const board=document.getElementById('livePlayersBoard');
+  if(board){
+    const wrap=document.createElement('div');
+    wrap.innerHTML=topGameList(topsByCurrent.slice(0,5));
+    board.replaceWith(wrap.firstElementChild);
+  }
+  const meta=document.getElementById('livePlayersSource');
+  if(meta)meta.textContent=playerHeatSubtitle();
+  window.LudoI18n?.apply(document.getElementById('livePlayersBoard'),state.lang);
+}
+async function fetchLivePlayers(){
+  try{
+    const res=await fetch(`live_players.json?cache=${Date.now()}`,{cache:'no-store'});
+    if(!res.ok)throw new Error(`HTTP ${res.status}`);
+    const payload=await res.json();
+    if(!payload||typeof payload!=='object')throw new Error('invalid payload');
+    livePlayerPayload=payload;
+  }catch(error){
+    // Never label historical data as current Steam data when refreshing fails.
+    livePlayerPayload=null;
+  }
+  refreshLiveHeat();
+}
+
 function applyChromeText(){
   document.documentElement.lang=state.lang;
   const labels={overview:txt('探索首页','探索首頁','Home'),radar:txt('游戏机会雷达','遊戲機會雷達','Opportunity Radar'),assessment:txt('项目鉴定工作台','項目鑑定工作台','Project Workbench'),reports:txt('我的评估报告','我的評估報告','My Reports'),explorer:txt('游戏数据库','遊戲資料庫','Game Database'),research:txt('研究证据实验室','研究證據實驗室','Research Lab'),segments:txt('细分市场','細分市場','Market Segments'),watchlist:txt('我的观察列表','我的觀察列表','Watchlist')};
@@ -179,7 +233,11 @@ function switchPage(route){if(!NAV[route])return;state.route=route;state.page=1;
 function makeKpi(label,value,meta,ico,theme=''){return `<div class="kpi"><div class="kpi-top"><span class="kpi-label">${label}</span><span class="kpi-icon ${theme}">${icon(ico,17)}</span></div><div class="kpi-value mono">${value}</div><div class="kpi-meta">${meta}</div></div>`}
 function yearBars(){const max=Math.max(...DATA.years.map(v=>v.ai+v.non));return `<div class="year-chart">${DATA.years.map(v=>{const tot=v.ai+v.non,ht=tot/max*169;return `<div class="year-bar-wrap"><span class="year-share">${v.share.toFixed(1)}% ${txt('披露 AI','披露 AI','AI-disclosed')}</span><div class="year-stacked" style="height:${Math.max(ht,30)}px" title="${v.year} ${number(tot)} ${txt('款游戏','款遊戲','games')} · ${txt('其中 AI 披露','其中 AI 披露','of them AI-disclosed')} ${number(v.ai)}"><div class="bar-ai" style="height:${v.ai/tot*100}%"></div><div class="bar-non" style="height:${v.non/tot*100}%"></div></div><span class="year-label">${v.year}</span></div>`}).join('')}</div><div class="legend"><span><i></i>${txt('AI 披露组','AI 披露組','AI-disclosed')}</span><span class="non"><i></i>${txt('未披露组','未披露組','Non-disclosed')}</span></div><div class="insight-note">${icon('info',13)} ${txt('柱高代表当年样本规模；上方单独标注该年 AI 披露比例。2026 年数据截至 11 月 3 日，尚非完整自然年。','柱高代表當年樣本規模；上方單獨標註該年 AI 披露比例。2026 年資料截至 11 月 3 日，尚非完整自然年。','Bar height shows sample size; labels above each bar show the AI-disclosure share. 2026 is still a partial year as of Nov 3.')}</div>`}
 function ratingBars(){const a=DATA.ratings[0],n=DATA.ratings[1];return `<div class="mini-label">有至少 10 条官方评论的游戏 · 游戏等权平均好评率</div><div class="rating-row"><span class="rating-name">AI 制作组 <small style="color:#9da9b8">n=${number(a.n)}</small></span><span class="rating-score ai">${pct(a.mean)}</span></div><div class="track"><span style="width:${a.mean}%"></span></div><div class="rating-row"><span class="rating-name">非 AI 制作组 <small style="color:#9da9b8">n=${number(n.n)}</small></span><span class="rating-score non">${pct(n.mean)}</span></div><div class="track teal"><span style="width:${n.mean}%"></span></div><div class="rating-diff"><strong>−${(n.mean-a.mean).toFixed(2)}%</strong><span>两组平均好评率差异<br>仅为观察性关联，不代表 AI 的因果影响</span></div>`}
-function topGameList(items){return `<div class="top-games">${items.map((g,i)=>`<div class="game-list-row" data-game="${get(g,'appid')}"><span class="rank">${String(i+1).padStart(2,'0')}</span>${cover(g)}<div class="game-list-name"><strong>${esc(gName(g))}</strong><small>${esc(genreName(gPrimary(g)))} · ${get(g,'year')}</small></div><div class="list-val"><strong>${compact(get(g,'current'))}</strong><small>${txt('同时在线','同時在線','Concurrent')}</small></div></div>`).join('')}</div>`}
+function topGameList(items){
+ const live=liveRankedGames();
+ const rows=live||items.map(g=>({game:g,count:get(g,'current')}));
+ return `<div class="top-games" id="livePlayersBoard">${rows.map((r,i)=>{const g=r.game;return `<div class="game-list-row" data-game="${get(g,'appid')}"><span class="rank">${String(i+1).padStart(2,'0')}</span>${cover(g)}<div class="game-list-name"><strong>${esc(gName(g))}</strong><small>${esc(genreName(gPrimary(g)))} · ${get(g,'year')}</small></div><div class="list-val"><strong>${compact(r.count)}</strong><small>${live?txt('近期同时在线','近期同時在線','Recently concurrent'):txt('历史快照','歷史快照','Historical snapshot')}</small></div></div>`}).join('')}</div>`;
+}
 function topicRows(list,subset='ai',max=24){const metrics=DATA.reviewTopics[subset==='ai'?0:1];return list.map(([label,i])=>{const val=metrics.topic[i],v2=DATA.reviewTopics[subset==='ai'?1:0].topic[i];return `<div class="topic-row"><label>${label}</label><div class="topic-rail"><span style="width:${Math.min(100,val/max*100)}%"></span></div><b class="mono">${val.toFixed(1)}%</b></div>`}).join('')}
 function featureGameCards(){const ids=[1623730,2379780,1030300,3164500,3419430,1903340];return `<div class="feature-strip">${ids.map((id,i)=>{const g=byId.get(id);if(!g)return '';return `<button class="feature-game" data-game="${id}">${cover(g,'feature-cover')}<div class="feature-cover-shade"></div><div class="feature-game-info"><span class="feature-index">0${i+1} / FEATURED</span><b>${esc(gName(g))}</b><small>${number(get(g,'reviews'))} ${txt('条评论','條評論','reviews')} · ${txt('好评率','好評率','Positive')} ${pct(get(g,'positive'))}</small></div></button>`}).join('')}</div>`}
 function marketStory(){const r=DATA.research;return `<div class="nova-story-grid"><div class="nova-story-main"><span class="nova-kicker">RESEARCH HIGHLIGHT · NOV 2026</span><h3>${txt('AI 使用与玩家口碑之间，<em>究竟有什么关系？</em>','AI 使用與玩家口碑之間，<em>究竟有什麼關係？</em>','How is AI use <em>related to player sentiment?</em>')}</h3><p>${txt(`在 ${r.matchedPairs} 对按年份配对的 Steam 独立游戏中，AI 披露组的平均官方好评率低 ${Math.abs(r.main.effectPP).toFixed(2)}%。`,`在 ${r.matchedPairs} 對按年份配對的 Steam 獨立遊戲中，AI 披露組的平均官方好評率低 ${Math.abs(r.main.effectPP).toFixed(2)}%。`,`Across ${r.matchedPairs} year-matched pairs of Steam indie games, the AI-disclosed group shows an average official positive-rating gap of ${Math.abs(r.main.effectPP).toFixed(2)}%.`)}</p><button class="btn primary" data-nav="research">${txt('查看研究证据','查看研究證據','Open the research evidence')} ${icon('arrow-right',15)}</button></div><div class="nova-story-stat"><div class="stat-orb">${r.main.effectPP}<small>%</small></div><span>${txt('匹配后的好评率差异','配對後的好評率差異','Matched difference in positive rating')}</span><small>${ciText(r.main.lower,r.main.upper)}</small></div></div>`}
@@ -191,7 +249,7 @@ ${marketStory()}<div class="difference-note">${txt('阅读提示：此处 3.85% 
 <div class="section-title nova-section-title"><div><span class="nova-kicker">EXPLORE THE UNIVERSE</span><h2>${txt('值得留意的游戏 <span>✳</span>','值得留意的遊戲 <span>✳</span>','Games worth watching <span>✳</span>')}</h2><p>${txt('点击封面查看游戏资料、评价与市场指标','點擊封面查看遊戲資料、評價與市場指標','Open a cover to inspect details, reviews, and market signals')}</p></div><button class="btn" data-nav="explorer">${txt(`进入 ${number(S.gameCount)} 款游戏库`,`進入 ${number(S.gameCount)} 款遊戲庫`,`Open the ${number(S.gameCount)}-game database`)} ${icon('arrow-right',14)}</button></div>
 ${featureGameCards()}
 <div class="panel-grid nova-panels">${panel(txt('AI 创作正在改变供给结构','AI 創作正在改變供給結構','AI creation is changing the supply side'),txt('按发行年份统计，颜色表示披露 AI 使用的比例','按發行年份統計，顏色表示披露 AI 使用的比例','By release year; colors show the AI-disclosure share'),yearBars(),'<span class="panel-badge">SUPPLY SIGNALS</span>')}${panel(txt('从数据理解游戏口碑','研究進展 · 最新正式資料','Research progress · latest formal data'),txt('不把第三方销量估计当作独立结论','不把第三方銷量估計當作獨立結論','Third-party sales estimates are not treated as standalone evidence'),`<div class="evidence-bites"><div><span>${txt('01 / 主发现','01 / 主發現','01 / Main finding')}</span><strong>−3.85 %</strong><small>${txt('匹配游戏官方好评率差异','匹配遊戲官方好評率差異','Difference in official positive rating after matching')}</small></div><div><span>02 / 2025</span><strong>−4.94 %</strong><small>${txt('160 对游戏 · 差异显著','160 對遊戲 · 差異顯著','160 pairs · significant gap')}</small></div><div><span>03 / 2026</span><strong>−4.19 %</strong><small>${txt('261 对游戏 · 差异显著','261 對遊戲 · 差異顯著','261 pairs · significant gap')}</small></div></div><div class="insight-note">${txt('这些数值是观察性差异。2024 年差异不显著；不能据此声称 AI 导致评分下降。','這些數值是觀察性差異。2024 年差異不顯著；不能據此聲稱 AI 導致評分下降。','These are observational differences. The 2024 result is not significant, so this does not prove AI caused lower ratings.')}</div><button class="btn wide" data-nav="research">${txt('打开完整证据实验室','打開完整證據實驗室','Open the full evidence lab')} →</button>`,'<span class="panel-badge">MATCHED EVIDENCE</span>')}</div>
-<div class="panel-grid nova-panels">${panel(txt('赛道脉搏','賽道脈搏','Submarket pulse'),txt('市场规模、AI 参与和口碑差异的入口','市場規模、AI 參與和口碑差異的入口','A quick view of market size, AI participation and rating gaps'),`<div class="pulse-list">${DATA.genres.slice(0,6).map((g,i)=>`<button data-segment="${esc(g.name)}"><span class="pulse-num">0${i+1}</span><span class="pulse-name">${genreName(g.name)}</span><div class="pulse-track"><span style="width:${g.aiShare}%"></span></div><b>${g.aiShare}%</b><small>${txt('AI 占比','AI 佔比','AI share')}</small><span>↗</span></button>`).join('')}</div>`,`<button class="panel-accent-link" data-nav="segments">${txt('完整赛道分析','完整賽道分析','Full segment analysis')} →</button>`)}${panel(txt('当前玩家热度','當前玩家熱度','Current player heat'),txt('2026-11-03 快照，不是实时榜单','2026-11-03 快照，不是即時榜單','Snapshot from 2026-11-03, not a live ranking'),topGameList(topsByCurrent.slice(0,5)),`<button class="panel-accent-link" data-nav="explorer">${txt('检索全游戏库','檢索全遊戲庫','Search the full database')} →</button>`)}</div>${footer()}`;}
+<div class="panel-grid nova-panels">${panel(txt('赛道脉搏','賽道脈搏','Submarket pulse'),txt('市场规模、AI 参与和口碑差异的入口','市場規模、AI 參與和口碑差異的入口','A quick view of market size, AI participation and rating gaps'),`<div class="pulse-list">${DATA.genres.slice(0,6).map((g,i)=>`<button data-segment="${esc(g.name)}"><span class="pulse-num">0${i+1}</span><span class="pulse-name">${genreName(g.name)}</span><div class="pulse-track"><span style="width:${g.aiShare}%"></span></div><b>${g.aiShare}%</b><small>${txt('AI 占比','AI 佔比','AI share')}</small><span>↗</span></button>`).join('')}</div>`,`<button class="panel-accent-link" data-nav="segments">${txt('完整赛道分析','完整賽道分析','Full segment analysis')} →</button>`)}${panel(txt('当前玩家热度','當前玩家熱度','Current player heat'),`<span id="livePlayersSource">${playerHeatSubtitle()}</span>`,topGameList(topsByCurrent.slice(0,5)),`<button class="panel-accent-link" data-nav="explorer">${txt('检索全游戏库','檢索全遊戲庫','Search the full database')} →</button>`)}</div>${footer()}`;}
 function filterGames(){let r=G;
 const q=state.query.trim().toLowerCase();
 if(q)r=r.filter(g=>(allNames(g)+' '+String(get(g,'developer'))+' '+String(get(g,'publisher'))+' '+String(get(g,'appid'))).toLowerCase().includes(q));
@@ -284,4 +342,6 @@ const ls=document.getElementById('langSwitch');if(ls)ls.addEventListener('change
 document.getElementById('menuButton').addEventListener('click',()=>document.getElementById('sidebar').classList.toggle('open'));
 document.addEventListener('keydown',e=>{if(e.key==='Escape'){closeModal();document.getElementById('sidebar').classList.remove('open')}if(e.key==='/'&& !['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName)){e.preventDefault();switchPage('explorer');document.getElementById('exploreSearch')?.focus()}});
 try{initIcons();applyChromeText();render()}catch(e){page.innerHTML=`<div class="empty"><h3>网站渲染出错</h3><p>${esc(e.message)}</p></div>`;console.error(e)}
+fetchLivePlayers();
+setInterval(fetchLivePlayers,4*60*1000);
 })();
